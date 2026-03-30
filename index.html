@@ -933,7 +933,7 @@ footer {
       <table class="sens-table">
         <thead>
           <tr>
-            <th>Escenario de dólar</th>
+            <th>Escenario del dólar</th>
             <th>Precio dólar</th>
             <th>Resultado (ARS)</th>
             <th>Resultado (USD)</th>
@@ -1371,7 +1371,7 @@ function calcular() {
 
     tbody.innerHTML += `
       <tr class="${rowClass}" style="${rowStyle}">
-        <td class="label-col">${esc.label}${isHoy && !esc.neutral ? ' <span style="font-size:10px;color:#16a34a;font-family:Outfit">(escenario actual)</span>' : ''}</td>
+        <td class="label-col" style="${esc.mult > 1 && !esc.neutral ? 'color:#dc2626;' : ''}">${esc.label}${isHoy && !esc.neutral ? ' <span style="font-size:10px;color:#16a34a;font-family:Outfit">(escenario actual)</span>' : ''}</td>
         <td>$ ${fmt(dolarEsc, 0)}</td>
         <td style="${arsColor}">${fmtARS(ganARS)}</td>
         <td style="${usdColor}">${fmtUSD(ganUSD)}</td>
