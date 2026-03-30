@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador de Carry Trade | Revolución Financiera</title>
+<link rel="icon" type="image/png" href="https://rfinanciera.github.io/Comisiones.brokers/revfin_logo.png">
+<link rel="apple-touch-icon" href="https://rfinanciera.github.io/Comisiones.brokers/revfin_logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #f4faf5;
+  --bg2: #eaf4ec;
+  --card: #ffffff;
+  --card-border: rgba(0,0,0,0.08);
+  --card-hover: rgba(34,197,94,0.1);
+  --green: #16a34a;
+  --green-light: #15803d;
+  --green-pale: #166534;
+  --green-glow: rgba(34,197,94,0.18);
+  --green-dark: rgba(34,197,94,0.1);
+  --red: #dc2626;
+  --red-dark: rgba(220,38,38,0.07);
+  --red-glow: rgba(220,38,38,0.15);
+  --amber: #b45309;
+  --text: #0f1f0f;
+  --text-muted: #166534;
+  --text-dim: rgba(15,31,15,0.45);
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Outfit', sans-serif;
+  --radius: 18px;
+  --radius-sm: 10px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 90% 55% at 15% -5%, rgba(34,197,94,0.1) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 45% at 85% 105%, rgba(34,197,94,0.07) 0%, transparent 55%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.wrapper {
+  position: relative;
+  z-index: 1;
+  max-width: 740px;
+  margin: 0 auto;
+  padding: 0 20px 80px;
+}
+
+/* ── HEADER ── */
+header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 28px 0 22px;
+  border-bottom: 1px solid var(--card-border);
+  margin-bottom: 44px;
+}
+
+header img {
+  height: 40px;
+  width: 40px;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+.brand-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--green);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.brand-tag {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+/* ── HERO ── */
+.hero {
+  text-align: center;
+  margin-bottom: 44px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--green-dark);
+  border: 1px solid rgba(34,197,94,0.22);
+  border-radius: 100px;
+  padding: 5px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--green);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+
+.pill-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+.hero h1 {
+  font-size: clamp(30px, 7vw, 46px);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+}
+
+.hero h1 em {
+  font-style: normal;
+  background: linear-gradient(130deg, #22c55e 0%, #4ade80 50%, #86efac 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero p {
+  margin-top: 14px;
+  color: var(--text-dim);
+  font-size: 15px;
+  line-height: 1.6;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ── CARDS ── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 28px 28px 32px;
+  margin-bottom: 18px;
+  transition: border-color 0.3s ease;
+}
+
+.card:hover { border-color: rgba(34,197,94,0.16); }
+
+.section-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--green);
+  margin-bottom: 22px;
+}
+
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(34,197,94,0.25), transparent);
+}
+
+/* ── INPUTS ── */
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.grid-4 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 14px;
+}
+
+@media (max-width: 620px) {
+  .grid-4 { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 480px) {
+  .wrapper { padding: 0 14px 60px; }
+
+  .card { padding: 20px 16px 24px; }
+
+  /* Cotizaciones: apilar en mobile */
+  .grid-2 { grid-template-columns: 1fr; }
+
+  /* Tasa y días: 3 columnas en mobile también pero más angostas */
+  .grid-4 { grid-template-columns: 1fr 0.55fr 0.5fr !important; }
+
+  /* Botones: calcular ocupa todo, compartir y resetear en fila abajo */
+  .btn-wrap {
+    grid-template-columns: 1fr 1fr !important;
+    grid-template-rows: auto auto;
+  }
+  #calcBtn { grid-column: 1 / -1; }
+  #shareBtn, #resetBtn { font-size: 13px; padding: 13px 10px; }
+
+  /* CTA banner: columna en mobile */
+  .cta-banner { flex-direction: column; align-items: flex-start; gap: 14px; }
+  .cta-btn { align-self: flex-start; }
+
+  /* Footer botones: columna */
+  footer { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .footer-ig-btn { margin-left: 0; }
+
+  /* Historial: texto más chico */
+  .hist-title { font-size: 12px; }
+  .hist-meta  { font-size: 11px; }
+  .hist-badge { font-size: 12px; padding: 4px 10px; }
+
+  /* Tabla de sensibilidad: reducir padding */
+  .sens-table tbody td,
+  .sens-table thead th { padding: 9px 8px; font-size: 11px; }
+
+  /* Result cards */
+  .result-grid { grid-template-columns: 1fr; }
+  .rc-value { font-size: 20px; }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.field label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.pfx, .sfx {
+  position: absolute;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  pointer-events: none;
+  color: var(--green);
+}
+.pfx { left: 13px; }
+.sfx { right: 13px; color: var(--text-dim); font-size: 11px; }
+
+input[type="text"], input[type="number"], select {
+  width: 100%;
+  background: #f8fdf8;
+  border: 1px solid rgba(0,0,0,0.12);
+  border-radius: var(--radius-sm);
+  padding: 12px 40px 12px 13px;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 600;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+
+input[type="text"]::-webkit-inner-spin-button,
+input[type="text"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+input[type="text"].has-pfx { padding-left: 36px; }
+
+input[type="text"]:focus, input[type="number"]:focus, select:focus {
+  border-color: rgba(22,163,74,0.5);
+  background: rgba(34,197,94,0.04);
+  box-shadow: 0 0 0 3px rgba(34,197,94,0.1);
+}
+
+input.input-error {
+  border-color: #dc2626 !important;
+  background: rgba(220,38,38,0.04) !important;
+  box-shadow: 0 0 0 3px rgba(220,38,38,0.1) !important;
+}
+
+/* Fila neutral (0%) en tabla de sensibilidad */
+.sens-row-neutral {
+  background: rgba(0,0,0,0.04) !important;
+}
+.sens-row-neutral td {
+  color: rgba(15,31,15,0.5) !important;
+  font-style: italic;
+}
+
+select {
+  cursor: pointer;
+  padding-right: 13px;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+select option { background: #fff; color: #0f1f0f; }
+
+/* ── BUTTON ── */
+.btn-wrap { margin-top: 8px; }
+
+button#calcBtn {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #16a34a, #22c55e);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: #fff;
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+  box-shadow: 0 4px 24px rgba(34,197,94,0.2);
+}
+
+button#calcBtn:hover {
+  opacity: 0.92;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 32px rgba(34,197,94,0.28);
+}
+
+button#calcBtn:active { transform: translateY(0); }
+
+button#resetBtn {
+  padding: 16px 20px;
+  background: transparent;
+  border: 1px solid rgba(0,0,0,0.12);
+  border-radius: var(--radius-sm);
+  color: var(--text-dim);
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+  white-space: nowrap;
+}
+
+button#resetBtn:hover {
+  border-color: #dc2626;
+  color: #dc2626;
+  background: rgba(220,38,38,0.04);
+}
+
+button#shareBtn {
+  padding: 16px 20px;
+  background: transparent;
+  border: 1px solid rgba(22,163,74,0.35);
+  border-radius: var(--radius-sm);
+  color: var(--green);
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+  white-space: nowrap;
+}
+
+button#shareBtn:hover {
+  border-color: var(--green);
+  background: rgba(22,163,74,0.06);
+}
+
+/* Toast de copiado */
+#shareToast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: #0f1f0f;
+  color: #fff;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 12px 22px;
+  border-radius: 100px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s, transform 0.25s;
+  z-index: 999;
+  white-space: nowrap;
+}
+
+#shareToast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ── HISTORIAL ── */
+.hist-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  cursor: pointer;
+  transition: background 0.15s;
+  border-radius: 6px;
+}
+
+.hist-item:last-child { border-bottom: none; }
+.hist-item:hover { background: rgba(0,0,0,0.02); padding-left: 6px; }
+
+.hist-meta {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-bottom: 4px;
+}
+
+.hist-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.hist-badge {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 100px;
+  white-space: nowrap;
+}
+
+.hist-badge.g { background: rgba(34,197,94,0.1); color: #15803d; }
+.hist-badge.r { background: rgba(220,38,38,0.08); color: #dc2626; }
+.hist-badge.a { background: rgba(217,119,6,0.08); color: #b45309; }
+
+.hist-hint {
+  font-size: 11px;
+  color: var(--text-dim);
+  text-align: center;
+  margin-top: 10px;
+  opacity: 0.7;
+}
+
+/* ── RESULTS ── */
+#results { display: none; }
+
+.result-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+@media (max-width: 480px) { .result-grid { grid-template-columns: 1fr; } }
+
+.result-card {
+  background: #fff;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  padding: 18px 20px;
+  transition: border-color 0.3s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+
+.result-card.gain {
+  background: rgba(34,197,94,0.07);
+  border-color: rgba(22,163,74,0.25);
+}
+
+.result-card.loss {
+  background: rgba(220,38,38,0.06);
+  border-color: rgba(220,38,38,0.2);
+}
+
+.result-card.neutral {
+  background: rgba(217,119,6,0.06);
+  border-color: rgba(217,119,6,0.2);
+}
+
+.rc-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+
+.rc-value {
+  font-family: var(--mono);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.rc-value.green { color: #15803d; }
+.rc-value.red   { color: #dc2626; }
+.rc-value.amber { color: #b45309; }
+.rc-value.white { color: var(--text); }
+
+.rc-sub {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 5px;
+}
+
+/* ── VERDICT BANNER ── */
+.verdict {
+  border-radius: var(--radius-sm);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.verdict.gain { background: rgba(34,197,94,0.08); border: 1px solid rgba(22,163,74,0.3); }
+.verdict.loss { background: rgba(220,38,38,0.06); border: 1px solid rgba(220,38,38,0.25); }
+.verdict.neutral { background: rgba(217,119,6,0.06); border: 1px solid rgba(217,119,6,0.25); }
+
+.verdict-icon { font-size: 26px; flex-shrink: 0; }
+
+/* ── CHART ── */
+.chart-wrap {
+  position: relative;
+  height: 260px;
+  margin-top: 4px;
+}
+
+/* ── SENSITIVITY TABLE ── */
+.sens-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.sens-table thead th {
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  border-bottom: 1px solid var(--card-border);
+}
+
+.sens-table tbody tr {
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  transition: background 0.15s;
+}
+
+.sens-table tbody tr:hover { background: rgba(0,0,0,0.02); }
+
+.sens-table tbody td {
+  padding: 11px 14px;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.sens-table td.label-col {
+  font-family: var(--sans);
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.chip {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.chip.g { background: rgba(34,197,94,0.1); color: #15803d; }
+.chip.r { background: rgba(220,38,38,0.08); color: #dc2626; }
+.chip.a { background: rgba(217,119,6,0.08); color: #b45309; }
+
+/* ── CTA BANNER ── */
+.cta-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: linear-gradient(135deg, #14532d, #166534);
+  border: 1px solid rgba(34,197,94,0.3);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-top: 18px;
+  text-decoration: none;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 20px rgba(22,101,52,0.2);
+}
+
+.cta-banner:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(22,101,52,0.28);
+}
+
+.cta-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.cta-logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  object-fit: cover;
+}
+
+.cta-text {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.3;
+}
+
+.cta-link {
+  font-size: 11px;
+  color: rgba(255,255,255,0.55);
+  margin-top: 3px;
+  font-family: var(--mono);
+}
+
+.cta-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: #ff0000;
+  color: #fff;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 10px 18px;
+  border-radius: 100px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.cta-banner:hover .cta-btn { background: #cc0000; }
+
+@media (max-width: 500px) {
+  .cta-banner { flex-direction: column; align-items: flex-start; }
+  .cta-btn { align-self: flex-start; }
+}
+
+/* ── FOOTER ACTIVO ── */
+footer {
+  text-align: center;
+  margin-top: 56px;
+  padding-top: 28px;
+  border-top: 1px solid var(--card-border);
+}
+
+.footer-disclaimer {
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.8;
+  margin-bottom: 20px;
+}
+
+.footer-yt-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #ff0000;
+  color: #fff;
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 700;
+  padding: 12px 24px;
+  border-radius: 100px;
+  text-decoration: none;
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  box-shadow: 0 4px 16px rgba(255,0,0,0.2);
+}
+
+.footer-yt-btn:hover {
+  background: #cc0000;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(255,0,0,0.28);
+}
+
+.footer-ig-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);
+  color: #fff;
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 700;
+  padding: 12px 24px;
+  border-radius: 100px;
+  text-decoration: none;
+  transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+  box-shadow: 0 4px 16px rgba(131,58,180,0.25);
+  margin-left: 10px;
+}
+
+.footer-ig-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(131,58,180,0.32);
+}
+
+.footer-credit {
+  margin-top: 16px;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.footer-credit a { color: var(--green); text-decoration: none; }
+.footer-credit a:hover { text-decoration: underline; }
+
+/* ── DIVIDER ── */
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--card-border), transparent);
+  margin: 22px 0;
+}
+
+/* ── ANNUALIZED ROW ── */
+.annual-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  background: #fff;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+
+.annual-row .ar-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dim);
+  letter-spacing: 0.04em;
+}
+
+.annual-row .ar-val {
+  font-family: var(--mono);
+  font-size: 15px;
+  font-weight: 700;
+}
+</style>
+</head>
+<body>
+
+<div class="wrapper">
+
+  <!-- HEADER -->
+  <header>
+    <a href="https://youtube.com/@RevolucionFinanciera" target="_blank" style="display:flex; align-items:center; gap:14px; text-decoration:none;">
+      <img src="https://rfinanciera.github.io/Comisiones.brokers/revfin_logo.png" alt="Revolución Financiera">
+      <div>
+        <div class="brand-name">Revolución Financiera</div>
+        <div class="brand-tag">Finanzas Personales · Inversiones · Economía</div>
+      </div>
+    </a>
+  </header>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="pill"><span class="pill-dot"></span>Simulador 2026</div>
+    <h1>Simulador de<br><em>Carry Trade</em></h1>
+    <p>¿Te convenía quedarte en pesos? Ingresá los datos y descubrí si la tasa le ganó al dólar.</p>
+  </div>
+
+  <!-- FORM -->
+  <div class="card">
+    <div class="section-label">💵 Tipo de dólar</div>
+    <div class="field" style="margin-bottom: 22px;">
+      <label>¿Con qué dólar operaste?</label>
+      <select id="tipoDolar">
+        <option value="blue">Dólar Blue</option>
+        <option value="mep">Dólar MEP (Bolsa)</option>
+        <option value="ccl">Dólar CCL (Contado con Liqui)</option>
+        <option value="oficial" selected>Dólar Oficial</option>
+      </select>
+    </div>
+
+    <div class="section-label">📊 Cotizaciones</div>
+    <div class="grid-2" style="margin-bottom: 22px;">
+      <div class="field">
+        <label>Precio inicial del dólar</label>
+        <div class="input-wrap">
+          <span class="pfx">$</span>
+          <input type="text" inputmode="numeric" id="dolarInicial" class="has-pfx num-input" placeholder="0">
+        </div>
+      </div>
+      <div class="field">
+        <label>Precio actual del dólar</label>
+        <div class="input-wrap">
+          <span class="pfx">$</span>
+          <input type="text" inputmode="numeric" id="dolarHoy" class="has-pfx num-input" placeholder="0">
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">🏦 Inversión en pesos</div>
+    <div class="field" style="margin-bottom: 14px;">
+      <label>Capital inicial (ARS)</label>
+      <div class="input-wrap">
+        <span class="pfx">$</span>
+        <input type="text" inputmode="numeric" id="capital" class="has-pfx num-input" placeholder="0" style="font-size:18px; padding-top:14px; padding-bottom:14px;">
+      </div>
+    </div>
+    <div class="grid-4" style="grid-template-columns: 1fr 0.5fr 0.45fr; max-width: 620px; margin: 0 auto;">
+      <div class="field">
+        <label>Tipo de tasa</label>
+        <select id="tipoTasa" onchange="actualizarLabelTasa()">
+          <option value="tna">TNA (Nominal Anual)</option>
+          <option value="tem">TEM (Mensual)</option>
+          <option value="tea">TEA (Efectiva Anual)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label id="labelTasa">Tasa (TNA)</label>
+        <div class="input-wrap">
+          <input type="text" inputmode="decimal" id="tna" class="num-input" placeholder="0" style="padding-right: 28px; font-size:13px;">
+          <span class="sfx">%</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>Días invertido</label>
+        <div class="input-wrap">
+          <input type="text" inputmode="numeric" id="dias" class="num-input" placeholder="0" style="font-size:13px;">
+          <span class="sfx">días</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="btn-wrap" style="display:grid; grid-template-columns: 1fr auto auto; gap: 10px;">
+      <button id="calcBtn" onclick="calcular()">Calcular resultado ↗</button>
+      <button id="shareBtn" onclick="compartir()" title="Compartir simulador">↗ Compartir</button>
+      <button id="resetBtn" onclick="resetear()" title="Limpiar todos los campos">↺ Resetear</button>
+    </div>
+  </div>
+
+  <!-- HISTORIAL -->
+  <div id="historialWrap" style="display:none;">
+    <div class="card">
+      <div class="section-label">🕓 Últimos cálculos</div>
+      <div id="historialItems"></div>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results">
+
+    <!-- VERDICT -->
+    <div id="verdict" class="verdict">
+      <div class="verdict-icon" id="verdictIcon"></div>
+      <div id="verdictText"></div>
+    </div>
+
+    <!-- MAIN METRICS -->
+    <div class="result-grid">
+      <div class="result-card" id="cardGanancia">
+        <div class="rc-label">Resultado en pesos</div>
+        <div class="rc-value" id="valGananciaARS">—</div>
+        <div class="rc-sub" id="subGananciaARS"></div>
+      </div>
+      <div class="result-card" id="cardGananciaUSD">
+        <div class="rc-label">Resultado en dólares</div>
+        <div class="rc-value" id="valGananciaUSD">—</div>
+        <div class="rc-sub" id="subGananciaUSD"></div>
+      </div>
+      <div class="result-card">
+        <div class="rc-label">Dólar de break-even</div>
+        <div class="rc-value white" id="valBreakeven">—</div>
+        <div class="rc-sub" id="subBreakeven"></div>
+      </div>
+      <div class="result-card">
+        <div class="rc-label">Variación del dólar</div>
+        <div class="rc-value" id="valVarDolar">—</div>
+        <div class="rc-sub" id="subVarDolar"></div>
+      </div>
+    </div>
+
+    <!-- ANNUALIZED -->
+    <div class="annual-row">
+      <div class="ar-label">🔄 Rendimiento en USD anualizado (TEA equivalente)</div>
+      <div class="ar-val" id="valAnual">—</div>
+    </div>
+
+    <!-- BREAKEVEN CHART -->
+    <div class="card">
+      <div class="section-label">📈 Evolución del dólar de break-even</div>
+      <div class="chart-wrap">
+        <canvas id="breakevenChart"></canvas>
+      </div>
+    </div>
+
+    <!-- SENSITIVITY TABLE -->
+    <div class="card">
+      <div class="section-label">🎯 Tabla de sensibilidad</div>
+      <table class="sens-table">
+        <thead>
+          <tr>
+            <th>Escenario del dólar</th>
+            <th>Precio dólar</th>
+            <th>Resultado (ARS)</th>
+            <th>Resultado (USD)</th>
+            <th>¿Ganaste?</th>
+          </tr>
+        </thead>
+        <tbody id="sensBody"></tbody>
+      </table>
+    </div>
+
+    <!-- CTA BANNER -->
+    <a href="https://youtube.com/@RevolucionFinanciera" target="_blank" class="cta-banner">
+      <div class="cta-left">
+        <img src="https://rfinanciera.github.io/Comisiones.brokers/revfin_logo.png" alt="Revolución Financiera" class="cta-logo">
+        <div>
+          <div class="cta-text">¿Querés más videos sobre inversiones y finanzas personales? 👇</div>
+          <div class="cta-link">youtube.com/@RevolucionFinanciera</div>
+        </div>
+      </div>
+      <div class="cta-btn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+        Suscribite
+      </div>
+    </a>
+
+  </div><!-- /results -->
+
+  <footer>
+    <div class="footer-disclaimer">⚠️ Este simulador es de carácter informativo y no constituye asesoramiento financiero.<br>
+    Los resultados son estimativos. Verificá siempre los datos antes de tomar decisiones de inversión.</div>
+    <a href="https://youtube.com/@RevolucionFinanciera" target="_blank" class="footer-yt-btn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+      Suscribite a Revolución Financiera
+    </a>
+    <a href="https://www.instagram.com/revolucionfinancieraok/" target="_blank" class="footer-ig-btn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+      Seguinos en Instagram
+    </a>
+    <div class="footer-credit">Hecho con ❤️ por <a href="https://youtube.com/@RevolucionFinanciera" target="_blank">Revolución Financiera</a></div>
+  </footer>
+
+</div><!-- /wrapper -->
+
+<div id="shareToast">✓ Link copiado al portapapeles</div>
+
+<script>
+let breakevenChart = null;
+let historial = []; // máx 3 entradas
+
+// ── Formateo con puntos estilo Argentina ──
+function parsearNum(str) {
+  // Quita puntos de miles, reemplaza coma decimal por punto
+  return parseFloat(str.replace(/\./g, '').replace(',', '.'));
+}
+
+function formatearConPuntos(str) {
+  // Solo dígitos y coma (para decimales)
+  const raw = str.replace(/[^\d,]/g, '');
+  const partes = raw.split(',');
+  partes[0] = partes[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return partes.join(',');
+}
+
+// Aplica formateo en tiempo real a un input
+function bindFormato(id) {
+  const el = document.getElementById(id);
+  el.addEventListener('input', () => {
+    const pos = el.selectionStart;
+    const prev = el.value;
+    const formatted = formatearConPuntos(el.value);
+    el.value = formatted;
+    // Mantener cursor en posición razonable
+    const diff = formatted.length - prev.length;
+    el.setSelectionRange(pos + diff, pos + diff);
+    // Limpiar error al tipear
+    el.classList.remove('input-error');
+  });
+  el.addEventListener('focus', () => el.classList.remove('input-error'));
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  ['dolarInicial', 'dolarHoy', 'capital', 'dias'].forEach(bindFormato);
+
+  // Campo tasa: acepta dígitos, coma y punto como separador decimal
+  const tnEl = document.getElementById('tna');
+  tnEl.addEventListener('input', () => {
+    // Permitir solo dígitos, punto y coma — y máximo un separador decimal
+    let v = tnEl.value.replace(/[^\d.,]/g, '');
+    // Normalizar: si hay punto Y coma, quedarse con el primero que aparezca
+    const firstSep = v.search(/[.,]/);
+    if (firstSep !== -1) {
+      const afterFirst = v.slice(firstSep + 1).replace(/[.,]/g, '');
+      v = v.slice(0, firstSep + 1) + afterFirst;
+    }
+    tnEl.value = v;
+    tnEl.classList.remove('input-error');
+  });
+  tnEl.addEventListener('focus', () => tnEl.classList.remove('input-error'));
+});
+
+function fmt(n, dec = 0) {
+  return n.toLocaleString('es-AR', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+}
+
+function fmtUSD(n) {
+  const abs = Math.abs(n);
+  const sign = n < 0 ? '-' : n > 0 ? '+' : '';
+  return sign + 'U$D ' + fmt(abs, 2);
+}
+
+function fmtARS(n) {
+  const abs = Math.abs(n);
+  const sign = n < 0 ? '-' : n > 0 ? '+' : '';
+  return sign + '$ ' + fmt(abs, 0);
+}
+
+function fmtPct(n) {
+  const sign = n > 0 ? '+' : '';
+  return sign + n.toFixed(2) + '%';
+}
+
+function compartir() {
+  const url = window.location.href;
+  const texto = '📊 Simulá tu Carry Trade con esta herramienta de Revolución Financiera';
+
+  if (navigator.share) {
+    navigator.share({ title: 'Simulador de Carry Trade', text: texto, url })
+      .catch(() => {});
+  } else {
+    navigator.clipboard.writeText(url).then(() => {
+      const toast = document.getElementById('shareToast');
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
+    });
+  }
+}
+
+
+function resetear() {
+  ['dolarInicial', 'dolarHoy', 'capital', 'tna', 'dias'].forEach(id => {
+    const el = document.getElementById(id);
+    el.value = '';
+    el.classList.remove('input-error');
+  });
+  document.getElementById('tipoDolar').value = 'oficial';
+  document.getElementById('tipoTasa').value = 'tna';
+  actualizarLabelTasa();
+  document.getElementById('results').style.display = 'none';
+  if (breakevenChart) { breakevenChart.destroy(); breakevenChart = null; }
+}
+
+function renderHistorial() {
+  const wrap = document.getElementById('historialWrap');
+  const container = document.getElementById('historialItems');
+  if (historial.length === 0) { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+
+  container.innerHTML = historial.map((h, i) => {
+    const badgeClass = h.gananciaUSD > 0.001 ? 'g' : h.gananciaUSD < -0.001 ? 'r' : 'a';
+    const badgeSign  = h.gananciaUSD > 0.001 ? '+' : '';
+    const tipoLabel  = { blue: 'Blue', mep: 'MEP', ccl: 'CCL', oficial: 'Oficial' }[h.tipoDolar];
+    const tasaLabel  = { tna: 'TNA', tem: 'TEM', tea: 'TEA' }[h.tipoTasa];
+
+    return `
+      <div class="hist-item" onclick="cargarHistorial(${i})">
+        <div>
+          <div class="hist-meta">${h.hora} · Dólar ${tipoLabel} · ${tasaLabel} ${h.tasa}% · ${h.dias} días</div>
+          <div class="hist-title">$ ${h.fmtCapital} → U$D ${h.fmtUSDIni} — Dólar $ ${h.fmtDolarIni} → $ ${h.fmtDolarHoy}</div>
+        </div>
+        <div class="hist-badge ${badgeClass}">${badgeSign}U$D ${h.fmtGanUSD}</div>
+      </div>
+    `;
+  }).join('');
+
+  if (historial.length > 1) {
+    container.innerHTML += `<div class="hist-hint">Hacé click en un cálculo para volver a cargarlo</div>`;
+  }
+}
+
+function cargarHistorial(i) {
+  const h = historial[i];
+  document.getElementById('dolarInicial').value = h.rawDolarIni;
+  document.getElementById('dolarHoy').value     = h.rawDolarHoy;
+  document.getElementById('capital').value      = h.rawCapital;
+  document.getElementById('tna').value          = h.tasa;
+  document.getElementById('dias').value         = h.dias;
+  document.getElementById('tipoDolar').value    = h.tipoDolar;
+  document.getElementById('tipoTasa').value     = h.tipoTasa;
+  actualizarLabelTasa();
+  // Formatear los campos numéricos
+  ['dolarInicial', 'dolarHoy', 'capital', 'dias'].forEach(id => {
+    const el = document.getElementById(id);
+    el.value = formatearConPuntos(el.value);
+  });
+  calcular();
+}
+
+
+function actualizarLabelTasa() {
+  const tipo = document.getElementById('tipoTasa').value;
+  const labels = { tna: 'Tasa (TNA)', tem: 'Tasa (TEM)', tea: 'Tasa (TEA)' };
+  document.getElementById('labelTasa').textContent = labels[tipo];
+  document.getElementById('tna').placeholder = '0';
+}
+
+function calcular() {
+  // Leer y parsear valores
+  const campos = {
+    dolarInicial: parsearNum(document.getElementById('dolarInicial').value),
+    dolarHoy:     parsearNum(document.getElementById('dolarHoy').value),
+    capital:      parsearNum(document.getElementById('capital').value),
+    tna:          parseFloat(document.getElementById('tna').value.replace(',', '.')),
+    dias:         parsearNum(document.getElementById('dias').value),
+  };
+
+  // Validación: marcar en rojo los vacíos/inválidos
+  let hayError = false;
+  for (const [id, val] of Object.entries(campos)) {
+    const el = document.getElementById(id);
+    if (isNaN(val) || val <= 0) {
+      el.classList.add('input-error');
+      hayError = true;
+    } else {
+      el.classList.remove('input-error');
+    }
+  }
+  if (hayError) return;
+
+  const dolarIni  = campos.dolarInicial;
+  const dolarHoy  = campos.dolarHoy;
+  const capital   = campos.capital;
+  const tasaInput = campos.tna;
+  const dias      = campos.dias;
+  const tipoDolar = document.getElementById('tipoDolar').value;
+  const tipoTasa  = document.getElementById('tipoTasa').value;
+
+  // ── Conversión de tasa ──
+  let tasaDiaria;
+  if (tipoTasa === 'tna') {
+    tasaDiaria = tasaInput / 100 / 365;
+  } else if (tipoTasa === 'tem') {
+    // TEM → tasa diaria efectiva (capitalización compuesta)
+    tasaDiaria = Math.pow(1 + tasaInput / 100, 1 / 30) - 1;
+  } else {
+    // TEA → tasa diaria efectiva
+    tasaDiaria = Math.pow(1 + tasaInput / 100, 1 / 365) - 1;
+  }
+
+  const factorTasa = tipoTasa === 'tna'
+    ? 1 + tasaDiaria * dias
+    : Math.pow(1 + tasaDiaria, dias);
+
+  const pesosFinales  = capital * factorTasa;
+  const gananciaPesos = pesosFinales - capital;
+  const usdInicial    = capital / dolarIni;
+  const usdFinal      = pesosFinales / dolarHoy;
+  const gananciaUSD   = usdFinal - usdInicial;
+  const rendimientoPct = (gananciaUSD / usdInicial) * 100;
+  const breakeven     = pesosFinales / usdInicial;
+  const varDolar      = ((dolarHoy - dolarIni) / dolarIni) * 100;
+  const rendDiarioUSD = Math.pow(usdFinal / usdInicial, 1 / dias) - 1;
+  const teaUSD        = (Math.pow(1 + rendDiarioUSD, 365) - 1) * 100;
+
+  // ── Verdict ──
+  const verdict     = document.getElementById('verdict');
+  const verdictIcon = document.getElementById('verdictIcon');
+  const verdictText = document.getElementById('verdictText');
+  const tipoDolarLabel = { blue: 'Blue', mep: 'MEP', ccl: 'CCL', oficial: 'Oficial' }[tipoDolar];
+
+  verdict.className = 'verdict ' + (gananciaUSD > 0.001 ? 'gain' : gananciaUSD < -0.001 ? 'loss' : 'neutral');
+
+  if (gananciaUSD > 0.001) {
+    verdictIcon.textContent = '🚀';
+    verdictText.innerHTML = `<strong>¡La tasa le ganó al dólar ${tipoDolarLabel}!</strong> En ${dias} días tu posición en pesos generó un rendimiento positivo en dólares de <strong>${fmtPct(rendimientoPct)}</strong>. La estrategia de carry trade fue exitosa.`;
+  } else if (gananciaUSD < -0.001) {
+    verdictIcon.textContent = '📉';
+    verdictText.innerHTML = `<strong>El dólar ${tipoDolarLabel} le ganó a la tasa.</strong> En ${dias} días el dólar subió más que tu rendimiento en pesos. Perdiste <strong>${fmtUSD(Math.abs(gananciaUSD))}</strong> en términos reales.`;
+  } else {
+    verdictIcon.textContent = '⚖️';
+    verdictText.innerHTML = `<strong>Resultado neutral.</strong> La tasa prácticamente igualó la suba del dólar ${tipoDolarLabel}. Estás en el punto de break-even.`;
+  }
+
+  // ── Cards ──
+  const isGain = gananciaUSD > 0.001;
+  const isLoss = gananciaUSD < -0.001;
+  const colorClass = isGain ? 'green' : isLoss ? 'red' : 'amber';
+  const cardClass  = isGain ? 'gain'  : isLoss ? 'loss'  : 'neutral';
+
+  document.getElementById('cardGanancia').className = 'result-card ' + cardClass;
+  document.getElementById('valGananciaARS').className = 'rc-value ' + colorClass;
+  document.getElementById('valGananciaARS').textContent = fmtARS(gananciaPesos);
+  document.getElementById('subGananciaARS').textContent = `Capital final: $ ${fmt(pesosFinales, 0)}`;
+
+  document.getElementById('cardGananciaUSD').className = 'result-card ' + cardClass;
+  document.getElementById('valGananciaUSD').className = 'rc-value ' + colorClass;
+  document.getElementById('valGananciaUSD').textContent = fmtUSD(gananciaUSD);
+  document.getElementById('subGananciaUSD').textContent =
+    `${fmtPct(rendimientoPct)} en USD · Capital inicial: U$D ${fmt(usdInicial, 2)}`;
+
+  document.getElementById('valBreakeven').textContent = '$ ' + fmt(breakeven, 1);
+  document.getElementById('subBreakeven').textContent =
+    dolarHoy > breakeven
+      ? `El dólar superó el break-even ($ ${fmt(dolarHoy, 0)} > $ ${fmt(breakeven, 1)})`
+      : `El dólar aún no superó el break-even ($ ${fmt(dolarHoy, 0)} < $ ${fmt(breakeven, 1)})`;
+
+  document.getElementById('valVarDolar').className = 'rc-value ' + (varDolar > 0 ? 'red' : varDolar < 0 ? 'green' : 'amber');
+  document.getElementById('valVarDolar').textContent = fmtPct(varDolar);
+  document.getElementById('subVarDolar').textContent = `De $ ${fmt(dolarIni, 0)} a $ ${fmt(dolarHoy, 0)} en ${dias} días`;
+
+  const anualEl = document.getElementById('valAnual');
+  anualEl.style.color = teaUSD > 0 ? '#15803d' : '#dc2626';
+  anualEl.textContent = fmtPct(teaUSD) + ' TEA en USD';
+
+  // ── Chart ──
+  const maxDias = Math.max(dias * 2, 60);
+  const labels = [];
+  const dataBreakeven = [];
+  const step = Math.max(1, Math.floor(maxDias / 60));
+
+  for (let d = 1; d <= maxDias; d += step) {
+    labels.push(d);
+    const factor = tipoTasa === 'tna'
+      ? 1 + tasaDiaria * d
+      : Math.pow(1 + tasaDiaria, d);    dataBreakeven.push(capital * factor / usdInicial);
+  }
+
+  if (breakevenChart) breakevenChart.destroy();
+  const ctx = document.getElementById('breakevenChart').getContext('2d');
+
+  const gradLine = ctx.createLinearGradient(0, 0, ctx.canvas.width, 0);
+  gradLine.addColorStop(0, '#15803d');
+  gradLine.addColorStop(1, '#22c55e');
+  const gradFill = ctx.createLinearGradient(0, 0, 0, 260);
+  gradFill.addColorStop(0, 'rgba(34,197,94,0.15)');
+  gradFill.addColorStop(1, 'rgba(34,197,94,0.01)');
+
+  breakevenChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Dólar de break-even',
+          data: dataBreakeven,
+          borderColor: gradLine,
+          backgroundColor: gradFill,
+          borderWidth: 2.5,
+          pointRadius: 0,
+          fill: true,
+          tension: 0.3,
+        },
+        {
+          label: `Dólar actual (${tipoDolarLabel})`,
+          data: labels.map(() => dolarHoy),
+          borderColor: 'rgba(220,38,38,0.55)',
+          borderWidth: 1.5,
+          borderDash: [6, 4],
+          pointRadius: 0,
+          fill: false,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          labels: { color: 'rgba(15,31,15,0.6)', font: { family: 'Outfit', size: 12 }, boxWidth: 16, padding: 16 }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(255,255,255,0.97)',
+          borderColor: 'rgba(22,163,74,0.25)',
+          borderWidth: 1,
+          titleColor: '#15803d',
+          bodyColor: '#0f1f0f',
+          callbacks: {
+            title: items => `Día ${items[0].label}`,
+            label: item => ` ${item.dataset.label}: $ ${parseFloat(item.raw).toLocaleString('es-AR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}`,
+          }
+        },
+      },
+      scales: {
+        x: {
+          ticks: { color: 'rgba(15,31,15,0.4)', font: { family: 'JetBrains Mono', size: 11 }, maxTicksLimit: 8, callback: v => 'Día ' + labels[v] },
+          grid: { color: 'rgba(0,0,0,0.05)' },
+        },
+        y: {
+          ticks: { color: 'rgba(15,31,15,0.4)', font: { family: 'JetBrains Mono', size: 11 }, callback: v => '$ ' + fmt(v, 0) },
+          grid: { color: 'rgba(0,0,0,0.05)' },
+        }
+      }
+    }
+  });
+
+  // ── Tabla de sensibilidad ──
+  const escenarios = [
+    { label: '↓ 15%', mult: 0.85 },
+    { label: '↓ 10%', mult: 0.90 },
+    { label: '↓ 8%',  mult: 0.92 },
+    { label: '↓ 5%',  mult: 0.95 },
+    { label: '↓ 3%',  mult: 0.97 },
+    { label: '0% (sin cambio)', mult: 1.00, neutral: true },
+    { label: '↑ 3%',  mult: 1.03 },
+    { label: '↑ 5%',  mult: 1.05 },
+    { label: '↑ 8%',  mult: 1.08 },
+    { label: '↑ 10%', mult: 1.10 },
+    { label: '↑ 15%', mult: 1.15 },
+  ];
+
+  const tbody = document.getElementById('sensBody');
+  tbody.innerHTML = '';
+
+  escenarios.forEach(esc => {
+    const dolarEsc = dolarIni * esc.mult;
+    const usdEsc   = pesosFinales / dolarEsc;
+    const ganUSD   = usdEsc - usdInicial;
+    const ganARS   = pesosFinales - (usdInicial * dolarEsc);
+    const gano   = ganUSD > 0.001;
+    const neutro = Math.abs(ganUSD) <= 0.001;
+
+    const isHoy = Math.abs(dolarEsc - dolarHoy) / dolarHoy < 0.005;
+
+    // Fila 0%: siempre gris. Fila actual: verde suave.
+    let rowClass = '';
+    if (esc.neutral) rowClass = 'sens-row-neutral';
+    else if (isHoy)  rowClass = 'sens-row-actual';
+
+    const rowStyle = isHoy && !esc.neutral ? 'background:rgba(34,197,94,0.06);' : '';
+
+    const chipClass = gano ? 'g' : neutro ? 'a' : 'r';
+    const chipText  = gano ? '✓ Ganaste' : neutro ? '= Break-even' : '✗ Perdiste';
+    const arsColor  = esc.neutral ? '' : gano ? 'color:#15803d' : neutro ? 'color:#b45309' : 'color:#dc2626';
+    const usdColor  = esc.neutral ? '' : gano ? 'color:#15803d' : neutro ? 'color:#b45309' : 'color:#dc2626';
+
+    tbody.innerHTML += `
+      <tr class="${rowClass}" style="${rowStyle}">
+        <td class="label-col" style="${esc.mult > 1 && !esc.neutral ? 'color:#dc2626;' : ''}">${esc.label}${isHoy && !esc.neutral ? ' <span style="font-size:10px;color:#16a34a;font-family:Outfit">(escenario actual)</span>' : ''}</td>
+        <td>$ ${fmt(dolarEsc, 0)}</td>
+        <td style="${arsColor}">${fmtARS(ganARS)}</td>
+        <td style="${usdColor}">${fmtUSD(ganUSD)}</td>
+        <td>${esc.neutral ? '<span style="font-size:12px;color:rgba(15,31,15,0.4)">—</span>' : `<span class="chip ${chipClass}">${chipText}</span>`}</td>
+      </tr>
+    `;
+  });
+
+  // ── Guardar en historial ──
+  const ahora = new Date();
+  const hora = ahora.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+  const entrada = {
+    hora,
+    tipoDolar, tipoTasa,
+    tasa: tasaInput,
+    dias,
+    gananciaUSD,
+    rawDolarIni: String(dolarIni),
+    rawDolarHoy: String(dolarHoy),
+    rawCapital:  String(capital),
+    fmtCapital:  fmt(capital, 0),
+    fmtUSDIni:   fmt(usdInicial, 2),
+    fmtDolarIni: fmt(dolarIni, 0),
+    fmtDolarHoy: fmt(dolarHoy, 0),
+    fmtGanUSD:   fmt(Math.abs(gananciaUSD), 2),
+  };
+  historial.unshift(entrada);
+  if (historial.length > 3) historial.pop();
+  renderHistorial();
+
+  document.getElementById('results').style.display = 'block';
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') calcular();
+});
+</script>
+</body>
+</html>
