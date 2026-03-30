@@ -202,6 +202,47 @@ header img {
   .grid-4 { grid-template-columns: 1fr 1fr; }
 }
 
+@media (max-width: 480px) {
+  .wrapper { padding: 0 14px 60px; }
+
+  .card { padding: 20px 16px 24px; }
+
+  /* Cotizaciones: apilar en mobile */
+  .grid-2 { grid-template-columns: 1fr; }
+
+  /* Tasa y días: 3 columnas en mobile también pero más angostas */
+  .grid-4 { grid-template-columns: 1fr 0.55fr 0.5fr !important; }
+
+  /* Botones: calcular ocupa todo, compartir y resetear en fila abajo */
+  .btn-wrap {
+    grid-template-columns: 1fr 1fr !important;
+    grid-template-rows: auto auto;
+  }
+  #calcBtn { grid-column: 1 / -1; }
+  #shareBtn, #resetBtn { font-size: 13px; padding: 13px 10px; }
+
+  /* CTA banner: columna en mobile */
+  .cta-banner { flex-direction: column; align-items: flex-start; gap: 14px; }
+  .cta-btn { align-self: flex-start; }
+
+  /* Footer botones: columna */
+  footer { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .footer-ig-btn { margin-left: 0; }
+
+  /* Historial: texto más chico */
+  .hist-title { font-size: 12px; }
+  .hist-meta  { font-size: 11px; }
+  .hist-badge { font-size: 12px; padding: 4px 10px; }
+
+  /* Tabla de sensibilidad: reducir padding */
+  .sens-table tbody td,
+  .sens-table thead th { padding: 9px 8px; font-size: 11px; }
+
+  /* Result cards */
+  .result-grid { grid-template-columns: 1fr; }
+  .rc-value { font-size: 20px; }
+}
+
 .field {
   display: flex;
   flex-direction: column;
