@@ -603,7 +603,61 @@ button#shareBtn:hover {
 .chip.r { background: rgba(220,38,38,0.08); color: #dc2626; }
 .chip.a { background: rgba(217,119,6,0.08); color: #b45309; }
 
-/* ── CTA BANNER ── */
+/* ── NAV SIMULADORES ── */
+.sim-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 12px 0;
+  margin-bottom: 4px;
+}
+
+.sim-nav-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-dim);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  margin-right: 4px;
+}
+
+.sim-nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid var(--card-border);
+  color: var(--text-dim);
+  background: #fff;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+  white-space: nowrap;
+}
+
+.sim-nav-link:hover {
+  border-color: rgba(22,163,74,0.4);
+  color: var(--green);
+  background: rgba(34,197,94,0.05);
+}
+
+.sim-nav-active {
+  border-color: rgba(22,163,74,0.4) !important;
+  color: var(--green) !important;
+  background: rgba(34,197,94,0.07) !important;
+  font-weight: 700 !important;
+  pointer-events: none;
+}
+
+@media (max-width: 480px) {
+  .sim-nav { gap: 6px; }
+  .sim-nav-label { width: 100%; margin-bottom: 2px; }
+  .sim-nav-link { font-size: 11px; padding: 5px 11px; }
+}
 .cta-banner {
   display: flex;
   align-items: center;
@@ -781,6 +835,20 @@ footer {
 <body>
 
 <div class="wrapper">
+
+  <!-- NAV SIMULADORES -->
+  <nav class="sim-nav">
+    <span class="sim-nav-label">Más simuladores:</span>
+    <a href="https://rfinanciera.github.io/Comisiones.brokers/" target="_blank" class="sim-nav-link">
+      💼 Comisiones Brokers
+    </a>
+    <a href="https://rfinanciera.github.io/lecap.vender.antes/" target="_blank" class="sim-nav-link">
+      📊 ¿Cuándo vender LECAPs?
+    </a>
+    <a href="#" class="sim-nav-link sim-nav-active">
+      💱 Carry Trade
+    </a>
+  </nav>
 
   <!-- HEADER -->
   <header>
